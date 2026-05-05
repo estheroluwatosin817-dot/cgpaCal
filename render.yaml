@@ -11,13 +11,11 @@ services:
         generateValue: true
       - key: DEBUG
         value: false
+      - key: DATABASE_URL
+        value: postgresql://neondb_owner:npg_i3Yqds0VbnPj@ep-wild-king-ane8zt0z-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
       - key: TWILIO_SID
         sync: false
       - key: TWILIO_AUTH_TOKEN
         sync: false
       - key: TWILIO_PHONE_NUMBER
         sync: false
-    databases:
-      - name: db
-        databaseName: cgpa_db
-        plan: free
