@@ -18,6 +18,12 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,cgpacal-lpdn.onrender.com').split(',')
 
+# CSRF fix for production
+CSRF_TRUSTED_ORIGINS = [
+    'https://cgpacal-lpdn.onrender.com',
+    'http://cgpacal-lpdn.onrender.com',
+]
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
