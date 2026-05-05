@@ -3,37 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Page</title>
+    <title>Login - CGPA Calculator</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'style.css' %}">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
-
     <div class="login-container">
-        <h2>Login</h2>
+        <h2>Welcome Back</h2>
 
         {% if messages %}
-            {% for message in messages %}
-                <p style="color:red; text-align:center;">{{ message }}</p>
-            {% endfor %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
         {% endif %}
 
-        <form method="POST">
+        <form method="POST" action="{% url 'login' %}">
             {% csrf_token %}
 
             <div class="input-group">
-                <label>Username</label>
-                <input type="text" name="username" placeholder="Enter your username" required>
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
             </div>
 
             <div class="input-group">
-                <label>Password</label>
-                <input type="password" id="password" name="password" placeholder="Enter your password" required>
-                <span class="toggle-eye" onclick="togglePassword('password','eyeIcon')">
-                    <i id="eyeIcon" class="fa-solid fa-eye"></i>
-                </span>
+                <label for="password">Password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    <span class="toggle-eye" onclick="togglePassword('password','eyeIcon')">
+                        <i id="eyeIcon" class="fa-solid fa-eye"></i>
+                    </span>
+                </div>
             </div>
 
             <button type="submit">Login</button>
@@ -56,6 +61,5 @@
             icon.classList.toggle("fa-eye-slash");
         }
     </script>
-
 </body>
 </html>
