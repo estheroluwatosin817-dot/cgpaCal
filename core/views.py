@@ -4,9 +4,12 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
+from django.http import HttpResponseRedirect
 
 import random
 import time
+
+from .models import Student, Level, Semester, Course
 
 
 # =========================
@@ -51,6 +54,16 @@ def register(request):
             password=password1
         )
 
+        # Create Student instance
+        Student.objects.create(
+            user=user,
+            full_name=username,
+            matric_number="",
+            faculty="",
+            department="",
+            program=""
+        )
+
         login(request, user)
         messages.success(request, "Account created successfully ✅")
         return redirect("dashboard")
@@ -86,9 +99,138 @@ def dashboard(request):
     if not request.user.is_authenticated:
         return redirect("login")
 
+    # Get or create Student
+    student, created = Student.objects.get_or_create(
+        user=request.user,
+        defaults={
+            'full_name': request.user.username,
+            'matric_number': '',
+            'faculty': '',
+            'department': '',
+            'program': ''
+        }
+    )
+
+    # Get all courses for this student
+    courses = Course.objects.filter(
+        semester__level__student=student
+    ).select_related('semester__level')
+
+    # Calculate CGPA
+    total_units = 0
+    total_points = 0
+    grade_map = {'A': 5, 'B': 4, 'C': 3, 'D': 2, 'E': 1, 'F': 0}
+
+    for course in courses:
+        total_units += course.unit
+        total_points += course.unit * grade_map.get(course.grade, 0)
+
+    cgpa = total_points / total_units if total_units > 0 else 0
+
+    if cgpa >= 4.5:
+        remark = "First Class"
+    elif cgpa >= 3.5:
+        remark = "Second Class Upper"
+    elif cgpa >= 2.5:
+        remark = "Second Class Lower"
+    elif cgpa >= 1.5:
+        remark = "Third Class"
+    else:
+        remark = "Fail"
+
     return render(request, "dashboard.html", {
-        "username": request.user.username
+        "username": request.user.username,
+        "student": student,
+        "courses": courses,
+        "cgpa": cgpa,
+        "remark": remark
     })
+
+
+# =========================
+# 🔹 SAVE STUDENT PROFILE
+# =========================
+def save_student(request):
+    if not request.user.is_authenticated:
+        return redirect("login")
+
+    if request.method == "POST":
+        student = Student.objects.get(user=request.user)
+        student.full_name = request.POST.get("full_name")
+        student.matric_number = request.POST.get("matric_number")
+        student.faculty = request.POST.get("faculty")
+        student.department = request.POST.get("department")
+        student.program = request.POST.get("program")
+        student.save()
+        messages.success(request, "Profile saved successfully ✅")
+
+    return redirect("dashboard")
+
+
+# =========================
+# 🔹 ADD COURSE
+# =========================
+def add_course(request):
+    if not request.user.is_authenticated:
+        return redirect("login")
+
+    if request.method == "POST":
+        student = Student.objects.get(user=request.user)
+
+        level_num = int(request.POST.get("level"))
+        semester_name = request.POST.get("semester")
+        title = request.POST.get("title")
+        code = request.POST.get("code")
+        unit = int(request.POST.get("unit"))
+        grade = request.POST.get("grade")
+
+        # Get or create Level
+        level, created = Level.objects.get_or_create(
+            student=student,
+            level=level_num,
+            defaults={'gpa': 0, 'locked': False}
+        )
+
+        # Get or create Semester
+        semester, created = Semester.objects.get_or_create(
+            level=level,
+            name=semester_name,
+            defaults={'gpa': 0}
+        )
+
+        # Create Course
+        Course.objects.create(
+            semester=semester,
+            title=title,
+            code=code,
+            unit=unit,
+            grade=grade
+        )
+
+        messages.success(request, "Course added successfully ✅")
+
+    return redirect("dashboard")
+
+
+# =========================
+# 🔹 DELETE COURSE
+# =========================
+def delete_course(request, course_id):
+    if not request.user.is_authenticated:
+        return redirect("login")
+
+    if request.method == "POST":
+        try:
+            course = Course.objects.get(
+                id=course_id,
+                semester__level__student__user=request.user
+            )
+            course.delete()
+            messages.success(request, "Course deleted successfully ✅")
+        except Course.DoesNotExist:
+            messages.error(request, "Course not found ❌")
+
+    return redirect("dashboard")
 
 
 # =========================
@@ -106,7 +248,6 @@ def otp_request(request):
     if request.method == "POST":
         email = request.POST.get("email")
 
-        # 🔥 CHECK USER EXISTS
         if not User.objects.filter(email=email).exists():
             return render(request, "otp_request.html", {
                 "error": "No account with this email ❌"
@@ -119,7 +260,6 @@ def otp_request(request):
             "time": time.time()
         }
 
-        # 🔥 SEND EMAIL
         send_mail(
             subject="Your OTP Code",
             message=f"Your OTP is {otp}. It expires in 5 minutes.",
@@ -152,16 +292,14 @@ def otp_verify(request):
                 "error": "OTP expired. Request again ❌"
             })
 
-        # 🔥 CHECK EXPIRY
         if time.time() - stored_data["time"] > OTP_EXPIRY_TIME:
             OTP_STORE.pop(email, None)
             return render(request, "otp_verify.html", {
                 "error": "OTP expired. Request new one ❌"
             })
 
-        # 🔥 CHECK OTP
         if stored_data["otp"] == user_otp:
-            OTP_STORE.pop(email, None)  # remove after success
+            OTP_STORE.pop(email, None)
             return redirect('reset_password')
         else:
             return render(request, "otp_verify.html", {
@@ -184,7 +322,6 @@ def reset_password(request):
         password1 = request.POST.get("password")
         password2 = request.POST.get("confirm_password")
 
-        # 🔥 PASSWORD MATCH CHECK
         if password1 != password2:
             return render(request, "rest_password.html", {
                 "error": "Passwords do not match ❌"
@@ -195,7 +332,6 @@ def reset_password(request):
             user.set_password(password1)
             user.save()
 
-            # 🔥 CLEANUP
             request.session.pop('email', None)
 
             messages.success(request, "Password reset successful ✅")

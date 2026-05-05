@@ -1,73 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Verify OTP</title>
-
-  {% load static %}
-  <link rel="stylesheet" href="{% static 'style.css' %}">
-  <link rel="stylesheet" href="{% static 'login.css' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-
 <body>
 
-<div class="login-box">
-  <h2>Verify OTP</h2>
+    <div class="login-container">
+        <h2>Verify OTP</h2>
 
-  <p style="text-align:center; font-size:14px; color:#555;">
-    Enter OTP sent to your email
-  </p>
+        {% if error %}
+            <p style="color:red; text-align:center;">{{ error }}</p>
+        {% endif %}
 
-  {% if error %}
-    <p style="color:red; text-align:center;">{{ error }}</p>
-  {% endif %}
+        <form method="POST">
+            {% csrf_token %}
 
-  <form method="POST">
-    {% csrf_token %}
+            <div class="input-group">
+                <label>OTP Code</label>
+                <input type="text" name="otp" placeholder="Enter 6-digit OTP" required>
+            </div>
 
-    <div class="input-box">
-      <input type="text" name="otp" placeholder="Enter OTP" required>
+            <button type="submit">Verify OTP</button>
+        </form>
+
+        <div class="links">
+            <a href="{% url 'otp_request' %}">Resend OTP</a>
+        </div>
     </div>
-
-    <button type="submit" class="btn">Verify OTP</button>
-
-  </form>
-
-  <!-- RESEND SECTION -->
-  <div class="links">
-    <a id="resendBtn" href="{% url 'otp_request' %}" onclick="return startTimer()">
-      Resend OTP (<span id="timer">60</span>s)
-    </a>
-  </div>
-</div>
-
-<script>
-  let timeLeft = 60;
-  let resendBtn = document.getElementById("resendBtn");
-  let timerDisplay = document.getElementById("timer");
-
-  function startTimer() {
-    resendBtn.style.pointerEvents = "none";
-    resendBtn.style.color = "grey";
-
-    let countdown = setInterval(() => {
-      timeLeft--;
-      timerDisplay.textContent = timeLeft;
-
-      if (timeLeft <= 0) {
-        clearInterval(countdown);
-        resendBtn.style.pointerEvents = "auto";
-        resendBtn.style.color = "#5a3e2b";
-        resendBtn.innerHTML = "Resend OTP";
-      }
-    }, 1000);
-
-    return true;
-  }
-
-  window.onload = startTimer;
-</script>
 
 </body>
 </html>

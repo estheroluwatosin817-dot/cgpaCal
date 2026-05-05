@@ -1,26 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
-
 /* ================= ROOT ================= */
 :root {
-  --brown: #5a3e2b;
-  --brown-light: #7a553d;
-  --cream: #f7f2ec;
+  --primary: #4facfe;
+  --primary-dark: #00c6ff;
+  --light-bg: linear-gradient(to right, #4facfe, #00f2fe);
   --white: #ffffff;
   --text: #2c2c2c;
-
-  --shadow: 0 10px 30px rgba(0,0,0,0.08);
-  --soft: 0 6px 18px rgba(0,0,0,0.06);
-
-  --radius: 16px;
+  --muted: #6f6f6f;
+  --shadow: 0 4px 10px rgba(0,0,0,0.2);
+  --radius: 10px;
   --transition: 0.25s ease;
 }
 
 /* ================= BODY ================= */
 body {
   margin: 0;
-  font-family: 'DM Sans', sans-serif;
-  background: linear-gradient(135deg, #faf7f3, #efe6dc);
+  font-family: Arial, sans-serif;
+  background: var(--light-bg);
   color: var(--text);
+  min-height: 100vh;
 }
 
 /* ================= TOP BAR ================= */
@@ -28,10 +25,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  background: var(--brown);
-  color: white;
-
+  background: var(--white);
+  color: var(--primary);
   padding: 14px 28px;
   box-shadow: var(--shadow);
   position: sticky;
@@ -40,8 +35,8 @@ body {
 }
 
 .top-bar .title {
-  font-family: 'Playfair Display', serif;
   font-size: 18px;
+  font-weight: bold;
 }
 
 .top-bar .right {
@@ -51,12 +46,16 @@ body {
 }
 
 .logout {
-  background: white;
-  color: var(--brown);
+  background: var(--primary);
+  color: white;
   padding: 6px 14px;
   border-radius: 20px;
   text-decoration: none;
   font-weight: 600;
+}
+
+.logout:hover {
+  background: var(--primary-dark);
 }
 
 /* ================= CONTAINER ================= */
@@ -72,12 +71,12 @@ body {
   border-radius: var(--radius);
   padding: 22px;
   margin-bottom: 22px;
-  box-shadow: var(--soft);
+  box-shadow: var(--shadow);
 }
 
 .card h3 {
-  font-family: 'Playfair Display', serif;
-  color: var(--brown);
+  color: var(--primary);
+  margin-bottom: 15px;
 }
 
 /* ================= INPUTS ================= */
@@ -85,19 +84,33 @@ input, select {
   width: 100%;
   padding: 10px;
   margin: 6px 0;
-
-  border: 1px solid #e5d8cc;
-  border-radius: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
   outline: none;
+  font-size: 14px;
+}
+
+/* ================= FORM GRID ================= */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+input:focus, select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
 }
 
 /* ================= BUTTON SYSTEM ================= */
 button {
   cursor: pointer;
   border: none;
-  border-radius: 10px;
-  padding: 8px 12px;
-  font-weight: 500;
+  border-radius: 5px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 600;
   transition: var(--transition);
 }
 
@@ -107,8 +120,10 @@ button:hover {
 
 /* ADD BUTTON */
 .btn-add {
-  background: var(--brown);
+  background: var(--primary);
   color: white;
+  width: 100%;
+  margin-top: 10px;
 }
 
 /* REMOVE BUTTON */
@@ -126,8 +141,8 @@ button:hover {
 
 /* ================= LEVEL ================= */
 .level {
-  background: #fbf7f3;
-  border: 1px solid #eadfd5;
+  background: #f0f8ff;
+  border: 1px solid #e0e0e0;
   padding: 16px;
   border-radius: var(--radius);
   margin-bottom: 16px;
@@ -167,7 +182,7 @@ button:hover {
   color: #999;
 }
 
-/* ================= ACTIONS (FIXED BUTTON SWITCH AREA) ================= */
+/* ================= ACTIONS ================= */
 .actions {
   display: flex;
   justify-content: space-between;
@@ -176,10 +191,11 @@ button:hover {
   gap: 10px;
 }
 
-/* Calculate button styling */
+/* Calculate button */
 #calcBtn {
-  background: var(--brown);
+  background: var(--primary);
   color: white;
+  flex: 1;
 }
 
 /* ================= RESULT ================= */
@@ -188,7 +204,7 @@ button:hover {
   padding: 16px;
   background: white;
   border-radius: 12px;
-  border-left: 5px solid var(--brown);
+  border-left: 5px solid var(--primary);
   display: none;
 }
 
@@ -196,31 +212,71 @@ button:hover {
   display: block;
 }
 
-.download-wrapper {
-  display: none;
-}
-
-/* NEW CLEAN DOWNLOAD AREA */
+/* ================= DOWNLOAD AREA ================= */
 #downloadArea {
   display: none;
   margin-top: 10px;
   justify-content: flex-end;
 }
 
-/* when shown */
-#downloadArea {
-  display: none;
-}
-
-#downloadArea[style*="flex"] {
-  display: flex;
-}
-
-/* button styling */
 #downloadBtn {
-  background: var(--brown);
+  background: var(--primary);
   color: white;
   padding: 10px 14px;
-  border-radius: 10px;
+  border-radius: 5px;
   cursor: pointer;
+}
+
+/* ================= RESULTS ================= */
+.results {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.result-card {
+  flex:1;
+  background: var(--white);
+  padding: 15px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.result-card h3 {
+  color: var(--primary);
+  margin:0;
+}
+
+/* ================= DOWNLOAD BUTTON ================= */
+.download-btn {
+  background: var(--primary);
+  color: white;
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+}
+
+/* ================= TABLE ================= */
+table {
+  width:100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+table th {
+  background: var(--primary);
+  color: white;
+  padding: 10px;
+  text-align: left;
+}
+
+table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+}
+
+table tr:hover {
+  background: #f0f8ff;
 }

@@ -2,276 +2,178 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Student CGPA Portal</title>
-
-<link rel="stylesheet" href="{% static 'dashboard.css' %}">
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <meta charset="UTF-8">
+    <title>CGPA Dashboard</title>
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 </head>
 
 <body>
 
-<div class="top-bar">
-  <div class="title">CGPA Student Portal</div>
-
-  <div class="right">
-    <span class="user">{{ username }}</span>
-    <a href="{% url 'logout' %}" class="logout">Logout</a>
-  </div>
-</div>
-
-<div class="dashboard-box">
-
-<!-- PROFILE -->
-<div class="card">
-  <h3>Student Profile</h3>
-
-  <input id="fullName" placeholder="Full Name">
-  <input id="matricNumber" placeholder="Matric Number">
-
-  <select id="faculty">
-    <option value="">Faculty</option>
-    <option>Engineering</option>
-    <option>Science</option>
-    <option>Management</option>
-    <option>Arts</option>
-  </select>
-
-  <select id="department">
-    <option value="">Department</option>
-    <option>Computer Science</option>
-    <option>Software Engineering</option>
-    <option>Cyber Security</option>
-  </select>
-
-  <select id="program">
-    <option value="">Program</option>
-    <option>BSc</option>
-    <option>HND</option>
-    <option>ND</option>
-  </select>
-</div>
-
-<!-- ACADEMIC -->
-<div class="card">
-  <h3>Academic Records</h3>
-
-  <div id="levels-container"></div>
-
-  <button class="btn-add" onclick="addLevel()">Add Level</button>
-
-  <div class="actions">
-    <button id="calcBtn" onclick="calculateCGPA()">Calculate CGPA</button>
-  </div>
-
-  <div id="result"></div>
-
-  <div id="downloadArea">
-    <button id="downloadBtn" onclick="downloadPDF()">Download PDF</button>
-  </div>
-
-</div>
-
-</div>
-
-<script>
-
-let levels = [100,200,300,400,500];
-let cgpaResult = 0;
-let classification = "";
-
-/* LEVEL */
-function addLevel() {
-  const container = document.getElementById("levels-container");
-
-  let used = [...container.querySelectorAll(".level")]
-    .map(l => parseInt(l.dataset.level));
-
-  let next = levels.find(l => !used.includes(l));
-  if (!next) return;
-
-  const level = document.createElement("div");
-  level.className = "level";
-  level.dataset.level = next;
-
-  level.innerHTML = `
-    <div class="level-header">
-      <h4>${next} Level</h4>
-      <button onclick="addSemester(${next})">Add Semester</button>
+    <div class="top-bar">
+        <div class="title">CGPA Student Portal</div>
+        <div class="right">
+            <span class="user">{{ username }}</span>
+            <a href="{% url 'logout' %}" class="logout">Logout</a>
+        </div>
     </div>
 
-    <div id="level-${next}-semesters"></div>
-  `;
+    <div class="dashboard-box">
 
-  container.appendChild(level);
-}
+        <!-- STUDENT DETAILS FORM -->
+        <div class="card">
+            <h3>Student Details</h3>
+            <form method="POST" action="{% url 'save_student' %}">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <input id="name" name="full_name" placeholder="Student Name" value="{{ student.full_name }}">
+                    <input id="matric" name="matric_number" placeholder="Matric Number" value="{{ student.matric_number }}">
+                    <input id="faculty" name="faculty" placeholder="Faculty" value="{{ student.faculty }}">
+                    <input id="dept" name="department" placeholder="Department" value="{{ student.department }}">
+                    <input id="program" name="program" placeholder="Program" value="{{ student.program }}">
+                </div>
+                <button type="submit" class="btn-add">Save Profile</button>
+            </form>
+        </div>
 
-/* SEMESTER */
-function addSemester(levelId) {
-  const container = document.getElementById(`level-${levelId}-semesters`);
+        <!-- COURSE INPUT FORM -->
+        <div class="card">
+            <h3>Add Course</h3>
+            <form method="POST" action="{% url 'add_course' %}">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <input name="title" placeholder="Course Title" required>
+                    <input name="code" placeholder="Course Code" required>
 
-  if (container.children.length >= 2) return;
+                    <select name="unit" required>
+                        <option value="1">1 Unit</option>
+                        <option value="2">2 Units</option>
+                        <option value="3">3 Units</option>
+                    </select>
 
-  const semId = container.children.length + 1;
+                    <select name="grade" required>
+                        <option value="5">A</option>
+                        <option value="4">B</option>
+                        <option value="3">C</option>
+                        <option value="2">D</option>
+                        <option value="1">E</option>
+                        <option value="0">F</option>
+                    </select>
 
-  const semester = document.createElement("div");
-  semester.className = "semester";
+                    <select name="level" required>
+                        <option value="">Select Level</option>
+                        <option>100</option>
+                        <option>200</option>
+                        <option>300</option>
+                        <option>400</option>
+                        <option>500</option>
+                    </select>
 
-  semester.innerHTML = `
-    <div class="semester-header">
-      <h5>Semester ${semId}</h5>
+                    <select name="semester" required>
+                        <option value="">Select Semester</option>
+                        <option>First</option>
+                        <option>Second</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-add">Add Course</button>
+            </form>
+        </div>
 
-      <!-- FIX: aligned buttons -->
-      <div class="btn-group">
-        <button onclick="addCourse('l${levelId}s${semId}')">Add Course</button>
-        <button onclick="this.closest('.semester').remove()">Remove Semester</button>
-      </div>
+        <!-- COURSES TABLE -->
+        <div class="card">
+            <h3>Courses</h3>
+            <table id="table">
+                <tr>
+                    <th>Level</th>
+                    <th>Semester</th>
+                    <th>Title</th>
+                    <th>Code</th>
+                    <th>Unit</th>
+                    <th>Grade</th>
+                    <th>Action</th>
+                </tr>
+                {% for course in courses %}
+                <tr>
+                    <td>{{ course.semester.level.level }}</td>
+                    <td>{{ course.semester.name }}</td>
+                    <td>{{ course.title }}</td>
+                    <td>{{ course.code }}</td>
+                    <td>{{ course.unit }}</td>
+                    <td>{{ course.get_grade_display }}</td>
+                    <td>
+                        <form method="POST" action="{% url 'delete_course' course.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-remove" onclick="return confirm('Delete this course?')">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <!-- RESULTS -->
+        <div class="results">
+            <div class="result-card">
+                <h3 id="cgpa">CGPA: {{ cgpa|floatformat:2 }}</h3>
+            </div>
+            <div class="result-card">
+                <h3 id="remark">Remark: {{ remark }}</h3>
+            </div>
+        </div>
+
+        <button class="btn-add download-btn" onclick="downloadPDF()">Download PDF</button>
+
     </div>
 
-    <div id="l${levelId}s${semId}"></div>
-  `;
+    <script>
+        const { jsPDF } = window.jspdf;
+        let cgpa = {{ cgpa }};
+        let remark = "{{ remark }}";
 
-  container.appendChild(semester);
-}
+        function downloadPDF() {
+            const doc = new jsPDF();
 
+            doc.text("CGPA REPORT", 20, 20);
+            doc.text("Name: " + document.getElementById("name").value, 20, 30);
+            doc.text("Matric: " + document.getElementById("matric").value, 20, 40);
+            doc.text("Faculty: " + document.getElementById("faculty").value, 20, 50);
+            doc.text("Department: " + document.getElementById("dept").value, 20, 60);
+            doc.text("Program: " + document.getElementById("program").value, 20, 70);
+            doc.text("CGPA: " + cgpa.toFixed(2), 20, 80);
+            doc.text("Remark: " + remark, 20, 90);
 
-/* COURSE (UNIT 1–3 STRICT) */
-function addCourse(id) {
-  const box = document.getElementById(id);
+            let tableData = [];
+            let sn = 1;
+            document.querySelectorAll("#table tr:not(:first-child)").forEach(row => {
+                const cells = row.querySelectorAll("td");
+                tableData.push([
+                    sn++,
+                    cells[2].innerText,
+                    cells[3].innerText,
+                    cells[4].innerText,
+                    cells[5].innerText
+                ]);
+            });
 
-  const row = document.createElement("div");
-  row.className = "course-row";
+            doc.autoTable({
+                head: [["S/N", "Course Title", "Code", "Unit", "Grade"]],
+                body: tableData,
+                startY: 100,
+                styles: { font: "times" },
+                headStyles: {
+                    fillColor: [79, 172, 254],
+                    textColor: 255
+                },
+                alternateRowStyles: {
+                    fillColor: [240, 248, 255]
+                }
+            });
 
-  row.innerHTML = `
-    <input placeholder="Course Title">
-    <input placeholder="Course Code">
-
-    <input type="number" min="1" max="3" placeholder="Unit" required>
-
-    <select>
-      <option value="">Grade</option>
-      <option>A</option>
-      <option>B</option>
-      <option>C</option>
-      <option>D</option>
-      <option>E</option>
-      <option>F</option>
-    </select>
-
-    <button onclick="this.parentElement.remove()">Remove Course</button>
-  `;
-
-  box.appendChild(row);
-}
-
-/* CGPA */
-function calculateCGPA() {
-
-  let totalUnits = 0;
-  let totalPoints = 0;
-
-  const map = {A:5,B:4,C:3,D:2,E:1,F:0};
-
-  document.querySelectorAll(".course-row").forEach(r => {
-    const unit = parseFloat(r.children[2].value);
-    const grade = r.children[3].value;
-
-    if (!isNaN(unit) && unit >= 1 && unit <= 3 && grade) {
-      totalUnits += unit;
-      totalPoints += unit * map[grade];
-    }
-  });
-
-  cgpaResult = totalUnits ? (totalPoints / totalUnits) : 0;
-
-  if (cgpaResult >= 4.5) classification = "First Class";
-  else if (cgpaResult >= 3.5) classification = "Second Class Upper";
-  else if (cgpaResult >= 2.5) classification = "Second Class Lower";
-  else if (cgpaResult >= 1.5) classification = "Third Class";
-  else classification = "Fail";
-
-  document.getElementById("result").innerHTML = `
-    <h3>CGPA RESULT</h3>
-    <p><b>Total Units:</b> ${totalUnits}</p>
-    <p><b>Total Grade Points:</b> ${totalPoints}</p>
-    <p><b>CGPA:</b> ${cgpaResult.toFixed(2)}</p>
-    <p><b>Remark:</b> ${classification}</p>
-  `;
-
-  document.getElementById("calcBtn").style.display = "none";
-  document.getElementById("downloadArea").style.display = "flex";
-}
-
-/* PDF (FINAL FIXED VERSION) */
-function downloadPDF() {
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  const name = document.getElementById("fullName").value || "student";
-  const matric = document.getElementById("matricNumber").value;
-  const faculty = document.getElementById("faculty").value;
-  const dept = document.getElementById("department").value;
-  const program = document.getElementById("program").value;
-
-  doc.setFont("times", "bold");
-  doc.setFontSize(16);
-  doc.text("STUDENT CGPA REPORT", 60, 15);
-
-  doc.setFont("times", "normal");
-  doc.setFontSize(11);
-
-  doc.text(`Name: ${name}`, 10, 30);
-  doc.text(`Matric No: ${matric}`, 10, 38);
-  doc.text(`Faculty: ${faculty}`, 10, 46);
-  doc.text(`Department: ${dept}`, 10, 54);
-  doc.text(`Program: ${program}`, 10, 62);
-
-  let tableData = [];
-  let sn = 1;
-
-  document.querySelectorAll(".course-row").forEach(r => {
-    tableData.push([
-      sn++,
-      r.children[0].value,
-      r.children[1].value,
-      r.children[2].value,
-      r.children[3].value
-    ]);
-  });
-
-  doc.autoTable({
-    head: [["S/N","Course Title","Code","Unit","Grade"]],
-    body: tableData,
-    startY: 70,
-
-    styles: {
-      font: "times"
-    },
-
-    headStyles: {
-      fillColor: [101, 67, 33], // brown
-      textColor: 255
-    },
-
-    alternateRowStyles: {
-      fillColor: [245, 240, 235]
-    }
-  });
-
-  let y = doc.lastAutoTable.finalY + 10;
-
-  doc.setFont("times", "bold");
-  doc.text(`CGPA: ${cgpaResult.toFixed(2)}`, 10, y);
-  doc.text(`Remark: ${classification}`, 10, y + 10);
-
-  let cleanName = name.replace(/\s+/g, "_");
-  doc.save(`${cleanName}_cgpa_report.pdf`);
-}
-
-</script>
+            let cleanName = document.getElementById("name").value.replace(/\s+/g, "_");
+            doc.save(cleanName + "_cgpa_report.pdf");
+        }
+    </script>
 
 </body>
 </html>

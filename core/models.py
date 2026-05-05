@@ -28,9 +28,21 @@ class Semester(models.Model):
 
 
 class Course(models.Model):
+    GRADE_CHOICES = [
+        ('A', 'A'),
+        ('B', 'B'),
+        ('C', 'C'),
+        ('D', 'D'),
+        ('E', 'E'),
+        ('F', 'F'),
+    ]
+
     semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
 
     title = models.CharField(max_length=200)
     code = models.CharField(max_length=20)
     unit = models.IntegerField()
-    grade = models.CharField(max_length=2)
+    grade = models.CharField(max_length=1, choices=GRADE_CHOICES, default='A')
+
+    def get_grade_display(self):
+        return self.grade

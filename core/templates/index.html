@@ -1,73 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Login</title>
-
-  {% load static %}
-  <link rel="stylesheet" href="{% static 'style.css' %}">
-  <link rel="stylesheet" href="{% static 'login.css' %}">
-
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-
 <body>
 
-  <div class="login-box">
-    <h2>Login</h2>
+    <div class="login-container">
+        <h2>Login</h2>
 
-    {% if messages %}
-      {% for message in messages %}
-        <p style="color:red; text-align:center;">{{ message }}</p>
-      {% endfor %}
-    {% endif %}
+        {% if messages %}
+            {% for message in messages %}
+                <p style="color:red; text-align:center;">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
 
-    <form method="POST">
-      {% csrf_token %}
+        <form method="POST">
+            {% csrf_token %}
 
-      <!-- Username -->
-      <div class="input-box">
-        <i class="fa-solid fa-user"></i>
-        <input type="text" name="username" placeholder="Username" required>
-      </div>
+            <div class="input-group">
+                <label>Username</label>
+                <input type="text" name="username" placeholder="Enter your username" required>
+            </div>
 
-      <!-- Password -->
-      <div class="input-box password-box">
-        <i class="fa-solid fa-lock"></i>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                <span class="toggle-eye" onclick="togglePassword('password','eyeIcon')">
+                    <i id="eyeIcon" class="fa-solid fa-eye"></i>
+                </span>
+            </div>
 
-        <input type="password" id="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
 
-        <span class="toggle-eye" onclick="togglePassword('password','eyeIcon')">
-          <i id="eyeIcon" class="fa-solid fa-eye"></i>
-        </span>
-      </div>
+        <div class="links">
+            <a href="{% url 'register' %}">Create account</a>
+            <a href="{% url 'otp_request' %}">Forgot password?</a>
+        </div>
+    </div>
 
-      <button type="submit" class="btn">LOGIN</button>
+    <script>
+        function togglePassword(fieldId, iconId) {
+            const input = document.getElementById(fieldId);
+            const icon = document.getElementById(iconId);
 
-      <div class="links">
-        <a href="{% url 'register' %}">Create account</a>
-        <a href="{% url 'otp_request' %}">Forgot password?</a>
-      </div>
-
-    </form>
-  </div>
-
-  <!-- SCRIPT -->
-  <script>
-    function togglePassword(fieldId, iconId) {
-      const input = document.getElementById(fieldId);
-      const icon = document.getElementById(iconId);
-
-      const isHidden = input.type === "password";
-
-      input.type = isHidden ? "text" : "password";
-
-      icon.classList.toggle("fa-eye");
-      icon.classList.toggle("fa-eye-slash");
-    }
-  </script>
+            const isHidden = input.type === "password";
+            input.type = isHidden ? "text" : "password";
+            icon.classList.toggle("fa-eye");
+            icon.classList.toggle("fa-eye-slash");
+        }
+    </script>
 
 </body>
 </html>

@@ -1,42 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Request OTP</title>
-
-  {% load static %}
-  <link rel="stylesheet" href="{% static 'style.css' %}">
-  <link rel="stylesheet" href="{% static 'login.css' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Request</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-
 <body>
 
-  <div class="login-box">
-    <h2>Forgot Password</h2>
+    <div class="login-container">
+        <h2>Request OTP</h2>
 
-    <p style="font-size:14px; color:#555; text-align:center;">
-      Enter your email to receive an OTP
-    </p>
+        {% if error %}
+            <p style="color:red; text-align:center;">{{ error }}</p>
+        {% endif %}
 
-    {% if error %}
-      <p style="color:red; text-align:center;">{{ error }}</p>
-    {% endif %}
+        <form method="POST">
+            {% csrf_token %}
 
-    <form method="POST">
-      {% csrf_token %}
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" name="email" placeholder="Enter your email" required>
+            </div>
 
-      <div class="input-box">
-        <input type="email" name="email" placeholder="Enter your email" required>
-      </div>
+            <button type="submit">Send OTP</button>
+        </form>
 
-      <button type="submit" class="btn">Send OTP</button>
-
-      <div class="links">
-        <a href="{% url 'login' %}">Back to Login</a>
-      </div>
-    </form>
-  </div>
+        <div class="links">
+            <a href="{% url 'login' %}">Back to Login</a>
+        </div>
+    </div>
 
 </body>
 </html>
