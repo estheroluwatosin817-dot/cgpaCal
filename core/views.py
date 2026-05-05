@@ -182,7 +182,10 @@ def add_course(request):
         title = request.POST.get("title")
         code = request.POST.get("code")
         unit = int(request.POST.get("unit"))
-        grade = request.POST.get("grade")
+        grade_value = request.POST.get("grade")
+        # Convert numeric grade to letter
+        grade_map_reverse = {'5': 'A', '4': 'B', '3': 'C', '2': 'D', '1': 'E', '0': 'F'}
+        grade = grade_map_reverse.get(grade_value, 'F')
 
         # Get or create Level
         level, created = Level.objects.get_or_create(
